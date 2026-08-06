@@ -207,7 +207,9 @@ struct SongDetailView: View {
                         onEndEditing: vm.onCanvasBlur
                     )
                 }
-                .padding(20)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+                .padding(.top, 10)
                 .frame(minWidth: geo.size.width, minHeight: geo.size.height, alignment: .topLeading)
             }
             .contentShape(Rectangle())

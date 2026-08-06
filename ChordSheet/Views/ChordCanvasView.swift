@@ -80,7 +80,7 @@ struct ChordCanvasView: UIViewRepresentable {
     static func highlightedText(_ text: String, fontSize: CGFloat, accentTheme: AccentTheme) -> NSAttributedString {
         let result = NSMutableAttributedString()
         let paragraph = NSMutableParagraphStyle()
-        paragraph.lineSpacing = fontSize * 0.34
+        paragraph.lineSpacing = fontSize * 0.17
         let chordFont = AppFont.monoUIFont(fontSize, weight: .bold)
         let lyricFont = AppFont.monoUIFont(fontSize, weight: .regular)
         let accentColor = accentTheme.uiColor
