@@ -128,6 +128,7 @@ struct SongDetailView: View {
             .font(AppFont.sans(16.5, weight: .semibold))
             .foregroundColor(Theme.ink)
             .submitLabel(.done)
+            .layoutPriority(-1)
 
             Button(action: vm.smaller) {
                 Text("A\u{2212}")
@@ -172,6 +173,8 @@ struct SongDetailView: View {
                     Text(languagePreference.t[.save])
                         .font(AppFont.sans(15.5, weight: .semibold))
                         .foregroundColor(Theme.accent)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                         .padding(.leading, 10)
                         .padding(.trailing, 6)
                         .frame(height: 44)
