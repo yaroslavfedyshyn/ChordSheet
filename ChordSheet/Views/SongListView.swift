@@ -97,11 +97,22 @@ struct SongListView: View {
                     topBar
                     VStack(spacing: 0) {
                         if !filterChips.isEmpty {
+                            // Scoped to just this row (not the List below):
+                            // a `simultaneousGesture(TapGesture())` on an
+                            // ancestor of `List` can swallow taps on its
+                            // rows' `swipeActions` buttons — those are
+                            // presented via a separate UIKit responder chain
+                            // (`UISwipeActionsConfiguration`), and SwiftUI's
+                            // "simultaneous" gesture recognizer wins the race
+                            // against it more often than not. The List's own
+                            // `.scrollDismissesKeyboard(.immediately)` and
+                            // each row's own tap handler already dismiss
+                            // focus everywhere else that matters.
                             tagFilterRow
+                                .simultaneousGesture(TapGesture().onEnded { searchFocused = false })
                         }
                         listArea
                     }
-                    .simultaneousGesture(TapGesture().onEnded { searchFocused = false })
                 }
 
                 addButton
