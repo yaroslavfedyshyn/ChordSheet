@@ -25,7 +25,7 @@ final class SongEditorViewModel: ObservableObject {
     @Published var draft: Song
     @Published var dirty: Bool
     @Published var cursor: Int = 0
-    @Published var sizeIndex: Int = 2
+    @Published var sizeIndex: Int = 4
     @Published var isEditing: Bool = false
     @Published var keyboardVisible: Bool = false
     @Published var stripOpen: Bool = false
