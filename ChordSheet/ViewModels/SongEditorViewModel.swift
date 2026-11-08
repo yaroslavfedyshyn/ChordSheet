@@ -25,7 +25,7 @@ final class SongEditorViewModel: ObservableObject {
     @Published var draft: Song
     @Published var dirty: Bool
     @Published var cursor: Int = 0
-    @Published var sizeIndex: Int = 4
+    @Published var sizeIndex: Int
     @Published var isEditing: Bool = false
     @Published var keyboardVisible: Bool = false
     @Published var stripOpen: Bool = false
@@ -62,6 +62,7 @@ final class SongEditorViewModel: ObservableObject {
     init(song: Song, store: SongStore, language: AppLanguage, transposeRange: Int = 11, accidentalsPreference: Accidentals = .auto) {
         self.draft = song
         self.dirty = false
+        self.sizeIndex = song.sizeIndex
         self.store = store
         self.strings = language.strings
         self.isNewSong = store.song(id: song.id) == nil
@@ -138,9 +139,26 @@ final class SongEditorViewModel: ObservableObject {
 
     // MARK: - Font size
 
-    func smaller() { sizeIndex = max(0, sizeIndex - 1) }
-    func bigger() { sizeIndex = min(ChordTheory.fontSizes.count - 1, sizeIndex + 1) }
+    func smaller() { setSizeIndex(max(0, sizeIndex - 1)) }
+    func bigger() { setSizeIndex(min(ChordTheory.fontSizes.count - 1, sizeIndex + 1)) }
     var fontSize: CGFloat { ChordTheory.fontSizes[sizeIndex] }
+
+    /// Remembers the chosen size on the song itself. For a song that's
+    /// already saved, this persists right away — like pin/unpin, it's a
+    /// standing preference, not draft content waiting on the Save button.
+    /// For a brand-new, not-yet-saved song it just updates the draft, and
+    /// reaches the store whenever that song is first saved.
+    private func setSizeIndex(_ newValue: Int) {
+        guard newValue != sizeIndex else { return }
+        sizeIndex = newValue
+        draft.sizeIndex = newValue
+        // `isNewSong` is fixed at init (it also gates auto key-detection), so
+        // it can't tell us whether this song has since been saved at least
+        // once — check the store directly instead.
+        if store.song(id: draft.id) != nil {
+            store.setSizeIndex(id: draft.id, sizeIndex: newValue)
+        }
+    }
 
     // MARK: - Transpose strip
 

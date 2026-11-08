@@ -12,6 +12,7 @@ struct SongBackupDTO: Codable {
     let tags: [String]
     let pinned: Bool
     let dateAdded: Date
+    let sizeIndex: Int
 
     init(song: Song) {
         id = song.id
@@ -22,15 +23,16 @@ struct SongBackupDTO: Codable {
         tags = song.tags
         pinned = song.pinned
         dateAdded = song.dateAdded
+        sizeIndex = song.sizeIndex
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, artist, key, body, tags, pinned, dateAdded
+        case id, title, artist, key, body, tags, pinned, dateAdded, sizeIndex
     }
 
-    // Backups exported before `dateAdded` existed won't have that key —
-    // fall back to `.distantPast` (oldest) rather than "now" so importing
-    // an old backup doesn't make every song look freshly added.
+    // Backups exported before `dateAdded`/`sizeIndex` existed won't have
+    // those keys — fall back to `.distantPast` (oldest) and the app-wide
+    // default size (4, 24pt) rather than failing to import.
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)
@@ -41,10 +43,11 @@ struct SongBackupDTO: Codable {
         tags = try c.decode([String].self, forKey: .tags)
         pinned = try c.decode(Bool.self, forKey: .pinned)
         dateAdded = try c.decodeIfPresent(Date.self, forKey: .dateAdded) ?? .distantPast
+        sizeIndex = try c.decodeIfPresent(Int.self, forKey: .sizeIndex) ?? 4
     }
 
     var asSong: Song {
-        Song(id: id, title: title, artist: artist, key: key, body: body, tags: tags, pinned: pinned, dateAdded: dateAdded)
+        Song(id: id, title: title, artist: artist, key: key, body: body, tags: tags, pinned: pinned, dateAdded: dateAdded, sizeIndex: sizeIndex)
     }
 }
 

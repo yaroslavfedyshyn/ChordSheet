@@ -114,6 +114,15 @@ final class SongStore: ObservableObject {
         save()
     }
 
+    /// Persists the song's chosen text size immediately — it's a per-song
+    /// display preference, not editable content, so it doesn't go through
+    /// the editor's dirty/save flow.
+    func setSizeIndex(id: String, sizeIndex: Int) {
+        guard let idx = songs.firstIndex(where: { $0.id == id }) else { return }
+        songs[idx].sizeIndex = sizeIndex
+        save()
+    }
+
     var hasPinnedSongs: Bool { songs.contains { $0.pinned } }
 
     func unpinAll() {
