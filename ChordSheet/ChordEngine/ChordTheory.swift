@@ -267,12 +267,18 @@ enum ChordTheory {
     private static let majorDegrees: [Int: TriadQuality] = [
         0: .major, 2: .minor, 4: .minor, 5: .major, 7: .major, 9: .minor, 11: .diminished
     ]
-    /// Diatonic triads of a natural-minor key. The fifth (offset 7) is handled
-    /// separately below, since folk/pop songs in a minor key routinely borrow the
-    /// harmonic-minor major dominant (e.g. E7 in A minor) rather than the natural v.
+    /// Diatonic triads of a natural-minor key. The fourth and fifth (offsets 5
+    /// and 7) are handled separately below: folk/pop songs in a minor key
+    /// routinely borrow the harmonic-minor major dominant (e.g. E7 in A minor)
+    /// rather than the natural v, and just as routinely borrow the Dorian
+    /// major iv (e.g. D in A minor) rather than the natural iv — both read to
+    /// the ear as "the same minor key", so neither should be penalized.
     private static let minorDegrees: [Int: TriadQuality] = [
         0: .minor, 2: .diminished, 3: .major, 5: .minor, 8: .major, 10: .major
     ]
+    /// Offsets (from the minor tonic) where both the natural-minor quality and
+    /// its common major-key borrow are accepted at full credit.
+    private static let minorBorrowedOffsets: Set<Int> = [5, 7]
 
     /// Every (root, major/minor) candidate's diatonic fit score for a chord
     /// sheet, best first. Shared by both the silent new-song auto-detect and
@@ -295,23 +301,29 @@ enum ChordTheory {
         // same diatonic chord palette, so the fit score alone is always tied.
         // Break ties deterministically — proportional to how often each candidate
         // tonic is actually played (no arbitrary "first max found" pick), plus
-        // whether it's the first/last chord (songs usually start/end on the
-        // tonic), with a hair of preference for major as the more common default.
+        // whether it's the first/last chord, with a hair of preference for major
+        // as the more common default. First/last outweighs raw frequency: a song
+        // starting and ending on its tonic is a far more reliable cue than chord
+        // count alone — a vi (relative minor) chord is routinely played as often
+        // as the I it resolves to (e.g. "Someone Like You", built on A-C#m-F#m-D
+        // with F#m the most frequent chord, is still heard and written as A major,
+        // the chord it opens on), so frequency alone must not outvote that.
         var candidates: [(name: String, score: Double)] = []
         for tonic in 0..<12 {
             for isMinor in [false, true] {
                 var score = 0.0
                 for o in occurrences {
                     let offset = ((o.pitchClass - tonic) % 12 + 12) % 12
-                    if isMinor && offset == 7 {
-                        // Harmonic-minor dominant allowance: both v and V fit fully.
+                    if isMinor && minorBorrowedOffsets.contains(offset) {
+                        // Harmonic-minor V (offset 7) / Dorian IV (offset 5) allowance:
+                        // both the natural minor chord and its common major borrow fit fully.
                         score += (o.quality == .major || o.quality == .minor) ? 1.0 : 0.4
                     } else if let expected = (isMinor ? minorDegrees : majorDegrees)[offset] {
                         score += (expected == o.quality) ? 1.0 : 0.4
                     }
                     // An offset with no diatonic entry is a chromatic chord — 0 credit.
                 }
-                score += 0.8 * Double(frequency[tonic] ?? 0)
+                score += 0.6 * Double(frequency[tonic] ?? 0)
                 if firstPitchClass == tonic { score += 1.5 }
                 if lastPitchClass == tonic { score += 1.5 }
                 if !isMinor { score += 0.05 }

@@ -34,6 +34,7 @@ final class SongEditorViewModel: ObservableObject {
     @Published var showToast: Bool = false
     @Published var tagSheetOpen: Bool = false
     @Published var tagQuery: String = ""
+    @Published var keyPickerOpen: Bool = false
     @Published private(set) var keyDetection: KeyDetectionResult?
     @Published private(set) var focusToken: Int = 0
     @Published private(set) var blurToken: Int = 0
@@ -106,6 +107,7 @@ final class SongEditorViewModel: ObservableObject {
         isEditing = true
         keyboardVisible = true
         stripOpen = false
+        keyPickerOpen = false
     }
 
     /// The chord bar only ever makes sense alongside a live keyboard to
@@ -168,6 +170,7 @@ final class SongEditorViewModel: ObservableObject {
 
     func toggleStrip() {
         keyDetection = nil
+        keyPickerOpen = false
         if stripOpen {
             stripOpen = false
             if resumeEditingAfterStripCloses {
@@ -200,6 +203,7 @@ final class SongEditorViewModel: ObservableObject {
     func transpose(semitones: Int) {
         stripOpen = false
         keyDetection = nil
+        keyPickerOpen = false
         guard semitones != 0 else { return }
         keyManuallySet = true
         let key = ChordTheory.keyParts(draft.key)
@@ -213,6 +217,7 @@ final class SongEditorViewModel: ObservableObject {
     /// Runs the manual key-detection algorithm against the current body and
     /// publishes the result for the panel under the "Detect key" button.
     func detectKey() {
+        keyPickerOpen = false
         guard let guess = ChordTheory.detectKeyGuess(from: draft.body) else {
             keyDetection = KeyDetectionResult(none: true, name: nil, alternateName: nil, sameAsCurrent: false)
             return
@@ -232,6 +237,25 @@ final class SongEditorViewModel: ObservableObject {
         draft.key = name
         dirty = true
         keyDetection = nil
+    }
+
+    // MARK: - Manual key picker
+
+    func toggleKeyPicker() {
+        keyDetection = nil
+        keyPickerOpen.toggle()
+    }
+
+    /// Sets the song's key label directly to whatever the user picked —
+    /// for when auto-detect guesses wrong (or can't, as with an ambiguous
+    /// or chromatically-borrowed chord set) and the user simply knows the
+    /// real key. Only the label changes; the chords are left exactly as
+    /// typed, same as `applyDetectedKey()`.
+    func setKeyManually(_ name: String) {
+        keyManuallySet = true
+        draft.key = name
+        dirty = true
+        keyPickerOpen = false
     }
 
     // MARK: - Tags

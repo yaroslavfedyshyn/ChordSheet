@@ -10,6 +10,7 @@ enum LKey: String {
     case emptyNone, emptyTag, emptyQuery, or
     case untitled, save, tagOne, addTags
     case transposeHeader, detectKey, fixKey, now
+    case setKey, setKeyNote, majorHeader, minorHeader
     case notEnough, notEnoughNote
     case fits, looks, couldBe, badgeSays
     case majorSuffix, minorSuffix
@@ -128,6 +129,8 @@ struct L10n {
             .emptyTag: "No songs tagged %@.", .emptyQuery: "Nothing matches \u{201C}%@\u{201D}.", .or: "or",
             .untitled: "Untitled song", .save: "Save", .tagOne: "Tag", .addTags: "Add tags",
             .transposeHeader: "TRANSPOSE", .detectKey: "Detect key", .fixKey: "Fix key", .now: "NOW",
+            .setKey: "Set key", .setKeyNote: "Sets the label only \u{2014} chords stay as they are.",
+            .majorHeader: "MAJOR", .minorHeader: "MINOR",
             .notEnough: "Not enough chords yet.", .notEnoughNote: "Type at least three chords and try again.",
             .fits: "These chords fit %@ \u{2014} the key looks right.", .looks: "These chords look like %@.",
             .couldBe: "Could also be %@.", .badgeSays: "The badge says %@. Chords stay as they are.",
@@ -163,6 +166,8 @@ struct L10n {
             .emptyTag: "Aucun morceau avec le tag %@.", .emptyQuery: "Rien ne correspond à «\u{00A0}%@\u{00A0}».", .or: "ou",
             .untitled: "Morceau sans titre", .save: "Enregistrer", .tagOne: "Tag", .addTags: "Ajouter des tags",
             .transposeHeader: "TRANSPOSER", .detectKey: "Détecter la tonalité", .fixKey: "Corriger", .now: "ACTUEL",
+            .setKey: "Définir la tonalité", .setKeyNote: "Change seulement l\u{2019}étiquette \u{2014} les accords ne changent pas.",
+            .majorHeader: "MAJEUR", .minorHeader: "MINEUR",
             .notEnough: "Pas encore assez d\u{2019}accords.", .notEnoughNote: "Saisissez au moins trois accords, puis réessayez.",
             .fits: "Ces accords correspondent à %@ \u{2014} la tonalité est bonne.", .looks: "Ces accords ressemblent à %@.",
             .couldBe: "Ce pourrait aussi être %@.", .badgeSays: "L\u{2019}étiquette indique %@. Les accords ne changent pas.",
@@ -198,6 +203,8 @@ struct L10n {
             .emptyTag: "Keine Songs mit dem Tag %@.", .emptyQuery: "Nichts passt zu \u{201E}%@\u{201C}.", .or: "oder",
             .untitled: "Song ohne Titel", .save: "Sichern", .tagOne: "Tag", .addTags: "Tags hinzufügen",
             .transposeHeader: "TRANSPONIEREN", .detectKey: "Tonart erkennen", .fixKey: "Korrigieren", .now: "JETZT",
+            .setKey: "Tonart festlegen", .setKeyNote: "Ändert nur das Label \u{2014} die Akkorde bleiben unverändert.",
+            .majorHeader: "DUR", .minorHeader: "MOLL",
             .notEnough: "Noch zu wenige Akkorde.", .notEnoughNote: "Mindestens drei Akkorde eingeben, dann erneut versuchen.",
             .fits: "Diese Akkorde passen zu %@ \u{2014} die Tonart stimmt.", .looks: "Diese Akkorde klingen nach %@.",
             .couldBe: "Könnte auch %@ sein.", .badgeSays: "Das Feld zeigt %@. Die Akkorde bleiben unverändert.",
@@ -233,6 +240,8 @@ struct L10n {
             .emptyTag: "Ninguna canción con la etiqueta %@.", .emptyQuery: "Nada coincide con «%@».", .or: "o",
             .untitled: "Canción sin título", .save: "Guardar", .tagOne: "Etiqueta", .addTags: "Añadir etiquetas",
             .transposeHeader: "TRANSPORTAR", .detectKey: "Detectar tonalidad", .fixKey: "Corregir", .now: "AHORA",
+            .setKey: "Fijar tonalidad", .setKeyNote: "Solo cambia la etiqueta \u{2014} los acordes no cambian.",
+            .majorHeader: "MAYOR", .minorHeader: "MENOR",
             .notEnough: "Aún faltan acordes.", .notEnoughNote: "Escribe al menos tres acordes e inténtalo otra vez.",
             .fits: "Estos acordes encajan en %@ \u{2014} la tonalidad es correcta.", .looks: "Estos acordes suenan a %@.",
             .couldBe: "También podría ser %@.", .badgeSays: "La etiqueta dice %@. Los acordes no cambian.",
@@ -268,6 +277,8 @@ struct L10n {
             .emptyTag: "Нет песен с тегом %@.", .emptyQuery: "Ничего не найдено по «%@».", .or: "или",
             .untitled: "Без названия", .save: "Сохранить", .tagOne: "Тег", .addTags: "Добавить теги",
             .transposeHeader: "ТРАНСПОНИРОВАТЬ", .detectKey: "Определить тональность", .fixKey: "Исправить", .now: "СЕЙЧАС",
+            .setKey: "Задать тональность", .setKeyNote: "Меняется только подпись \u{2014} аккорды остаются как есть.",
+            .majorHeader: "МАЖОР", .minorHeader: "МИНОР",
             .notEnough: "Пока мало аккордов.", .notEnoughNote: "Введите хотя бы три аккорда и попробуйте снова.",
             .fits: "Аккорды подходят к %@ \u{2014} тональность верна.", .looks: "Аккорды похожи на %@.",
             .couldBe: "Может быть и %@.", .badgeSays: "На бейдже %@. Аккорды остаются как есть.",
@@ -303,6 +314,8 @@ struct L10n {
             .emptyTag: "Немає пісень із тегом %@.", .emptyQuery: "Нічого не знайдено за «%@».", .or: "або",
             .untitled: "Без назви", .save: "Зберегти", .tagOne: "Тег", .addTags: "Додати теги",
             .transposeHeader: "ТРАНСПОНУВАТИ", .detectKey: "Визначити тональність", .fixKey: "Виправити", .now: "ЗАРАЗ",
+            .setKey: "Встановити тональність", .setKeyNote: "Змінюється лише підпис \u{2014} акорди лишаються як є.",
+            .majorHeader: "МАЖОР", .minorHeader: "МІНОР",
             .notEnough: "Поки замало акордів.", .notEnoughNote: "Введіть хоча б три акорди й спробуйте ще раз.",
             .fits: "Акорди пасують до %@ \u{2014} тональність правильна.", .looks: "Акорди схожі на %@.",
             .couldBe: "Може бути й %@.", .badgeSays: "На бейджі %@. Акорди лишаються як є.",

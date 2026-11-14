@@ -19,13 +19,20 @@ struct TransposeStripView: View {
                     .tracking(1.3)
                     .foregroundColor(Theme.muted)
                 Spacer()
-                detectKeyButton
+                HStack(spacing: 8) {
+                    setKeyButton
+                    detectKeyButton
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
 
             if let detection = vm.keyDetection {
                 detectionPanel(detection)
+            }
+
+            if vm.keyPickerOpen {
+                keyPickerPanel
             }
 
             ScrollViewReader { proxy in
@@ -68,21 +75,69 @@ struct TransposeStripView: View {
     }
 
     private var detectKeyButton: some View {
-        Button(action: vm.detectKey) {
+        stripToolButton(icon: "tuningfork", label: languagePreference.t[.detectKey], isActive: false, accessibilityId: "detectKeyButton", action: vm.detectKey)
+    }
+
+    private var setKeyButton: some View {
+        stripToolButton(icon: "pencil", label: languagePreference.t[.setKey], isActive: vm.keyPickerOpen, accessibilityId: "setKeyButton", action: vm.toggleKeyPicker)
+    }
+
+    /// Shared layout/styling for the strip's header buttons ("Detect key", "Set key") —
+    /// identical chrome, differing only in icon, label, active state, and action.
+    private func stripToolButton(icon: String, label: String, isActive: Bool, accessibilityId: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             HStack(spacing: 7) {
-                Image(systemName: "tuningfork")
+                Image(systemName: icon)
                     .font(.system(size: 12, weight: .semibold))
-                Text(languagePreference.t[.detectKey])
+                Text(label)
                     .font(AppFont.sans(13.5, weight: .semibold))
             }
-            .foregroundColor(Theme.accent)
+            .foregroundColor(isActive ? .white : Theme.accent)
             .padding(.horizontal, 12)
             .frame(height: 32)
-            .background(Theme.surface2)
+            .background(isActive ? Theme.accent : Theme.surface2)
             .clipShape(RoundedRectangle(cornerRadius: 9))
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("detectKeyButton")
+        .accessibilityIdentifier(accessibilityId)
+    }
+
+    /// Manual key picker: every major/minor key, tappable. Picking one only
+    /// relabels the song (`setKeyManually`) — it never transposes the body,
+    /// since the chords as typed are presumed already correct; this is for
+    /// when auto-detect guessed wrong, couldn't decide, or simply isn't
+    /// trusted for this song.
+    private static let keyPickerColumns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 6)
+
+    private var keyPickerPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(languagePreference.t[.setKeyNote])
+                .font(AppFont.sans(12))
+                .foregroundColor(Theme.muted)
+
+            keyPickerSection(title: languagePreference.t[.majorHeader], keys: ChordTheory.majorKeyNames)
+            keyPickerSection(title: languagePreference.t[.minorHeader], keys: ChordTheory.minorKeyNames)
+        }
+        .padding(14)
+        .background(Theme.surface2)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.horizontal, 20)
+        .transition(.opacity)
+    }
+
+    private func keyPickerSection(title: String, keys: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(AppFont.sans(11, weight: .medium))
+                .foregroundColor(Theme.muted)
+            LazyVGrid(columns: Self.keyPickerColumns, spacing: 6) {
+                ForEach(keys, id: \.self) { key in
+                    ChordChipButton(name: key, style: key == vm.draft.key ? .active : .plain) {
+                        vm.setKeyManually(key)
+                    }
+                }
+            }
+        }
     }
 
     private func detectionPanel(_ detection: KeyDetectionResult) -> some View {
